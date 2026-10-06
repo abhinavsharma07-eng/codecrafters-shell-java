@@ -27,7 +27,7 @@ public class Main {
                     for (String dir : directories) {
                         File file = new File(dir, command);
                         if (file.exists() && file.isFile()) {
-                            System.out.println(file.getAbsolutePath());
+                            System.out.println(command +" is "+file.getAbsolutePath());
                             found = true;
                             break;
                         }
