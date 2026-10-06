@@ -1,4 +1,6 @@
 import java.util.Scanner;
+import java.io.File;
+
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -6,25 +8,36 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.print("$ ");
 
+            System.out.print("$ ");
             String input = scanner.nextLine();
+
             if (input.equals("exit")) {
                 break;
-            } else if (input.startsWith("echo ")){
+            } else if (input.startsWith("echo ")) {
                 System.out.println(input.substring(5));
-            } else if(input.startsWith("type ")){
-                String type = input.substring(5);
-                if(type.trim().equals("echo")||type.trim().equals("exit")||type.trim().equals("type")){
-                    System.out.println(type.trim()+" is a shell builtin");
-                }
-                else {
-                    System.out.println(type.trim()+": not found");
+            } else if (input.startsWith("type ")) {
+                String command = input.substring(5).trim();
+                if (command.equals("echo") || command.equals("exit") || command.equals("type")) {
+                    System.out.println(command + " is a shell builtin");
+                } else {
+                    String path = System.getenv("PATH");
+                    String[] directories = path.split(":");
+                    boolean found = false;
+                    for (String dir : directories) {
+                        File file = new File(dir, command);
+                        if (file.exists() && file.isFile()) {
+                            System.out.println(file.getAbsolutePath());
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                        System.out.println(command + ": not found");
                 }
             } else {
                 System.out.println(input + ": command not found");
             }
         }
-
     }
 }
