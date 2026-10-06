@@ -22,7 +22,7 @@ public class Main {
                     System.out.println(command + " is a shell builtin");
                 } else {
                     String path = System.getenv("PATH");
-                    String[] directories = path.split(":");
+                    String[] directories = path.split(File.pathSeparator);
                     boolean found = false;
                     for (String dir : directories) {
                         File file = new File(dir, command);
