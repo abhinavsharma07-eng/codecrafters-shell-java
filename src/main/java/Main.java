@@ -30,7 +30,7 @@ public class Main {
                     boolean found = false;
                     for (String dir : directories) {
                         File file = new File(dir, command);
-                        if (file.exists() && file.isFile()) {
+                        if (file.exists() && file.canExecute()) {
                             System.out.println(command +" is "+file.getAbsolutePath());
                             found = true;
                             break;
