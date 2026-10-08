@@ -30,7 +30,7 @@ public class Main {
                 String executable = getPath(parts[0]);
                 if (executable != null) {
                     ArrayList<String> command = new ArrayList<>();
-                    command.add(executable);
+                    command.add(parts[0]);
                     for (int i = 1; i < parts.length; i++) {
                         command.add(parts[i]);
                     }
