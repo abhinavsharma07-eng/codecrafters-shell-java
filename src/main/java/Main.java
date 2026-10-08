@@ -46,7 +46,7 @@ public class Main {
                 System.out.println(currentDirectory.getCanonicalPath());
 
             } else if(command.equals("cd")) {
-                String argument = Main.cd(input.substring(3).trim());
+                String argument = Main.cd(input.substring(2).trim());
                 if(argument != null){
                     System.out.println(command + argument);
                 }
@@ -59,7 +59,7 @@ public class Main {
                     for (int i = 1; i < parts.length; i++) {
                         argument.add(parts[i]);
                     }
-                    ProcessBuilder pb = new ProcessBuilder(command);
+                    ProcessBuilder pb = new ProcessBuilder(argument);
                     pb.directory(currentDirectory);
                     pb.inheritIO();
 
@@ -84,7 +84,10 @@ public class Main {
 
     public static String cd(String argument) throws IOException {
         File newDirectory = new File(currentDirectory, argument);
-        if (newDirectory.isDirectory()) {
+        if(argument.equals("~")||argument.isEmpty()) {
+            currentDirectory =  new File(System.getenv("HOME")).getCanonicalFile();
+            return null;
+        }else if (newDirectory.isDirectory()) {
             currentDirectory = newDirectory.getCanonicalFile();
                 return null;
         }
