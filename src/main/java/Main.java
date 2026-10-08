@@ -1,5 +1,7 @@
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -16,14 +18,20 @@ public class Main {
             System.out.print("$ ");
             String input = scanner.nextLine();
 
-            if (input.trim().equals("exit")) {
+            if (input.startsWith("exit ")) {
                 break;
+
             } else if (input.startsWith("echo ")) {
                 System.out.println(input.substring(5));
+
             } else if (input.startsWith("type ")) {
 
                 String command = input.substring(5).trim();
                 System.out.println(command + Main.type(command));
+
+            } else if(input.equals("pwd")) {
+                File currentPath = new File(".");
+                System.out.println(currentPath.getCanonicalPath());
 
             } else {
                 String[] parts = input.split(" ");
@@ -47,7 +55,7 @@ public class Main {
 
     private static String type(String command) {
 
-        if (command.equals("echo") || command.equals("exit") || command.equals("type")) {
+        if (command.equals("echo") || command.equals("exit") || command.equals("type")|| command.equals("pwd")) {
             return " is a shell builtin";
         } else {
             String filePath = getPath(command);
