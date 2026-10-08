@@ -83,11 +83,18 @@ public class Main {
     }
 
     public static String cd(String argument) throws IOException {
-        File newDirectory = new File(currentDirectory, argument);
         if(argument.equals("~")||argument.isEmpty()) {
             currentDirectory =  new File(System.getenv("HOME")).getCanonicalFile();
             return null;
-        }else if (newDirectory.isDirectory()) {
+        }
+        File newDirectory;
+        if(new File(argument).isAbsolute()){
+            newDirectory = new File(argument);
+        }
+        else{
+            newDirectory = new File(currentDirectory, argument);
+        }
+        if (newDirectory.isDirectory()) {
             currentDirectory = newDirectory.getCanonicalFile();
                 return null;
         }
