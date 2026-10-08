@@ -1,8 +1,12 @@
-import java.util.Scanner;
-import java.io.File;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Main {
+
+    static String path = System.getenv("PATH");
+
     public static void main(String[] args) throws Exception {
 
         Scanner scanner = new Scanner(System.in);
@@ -12,36 +16,54 @@ public class Main {
             System.out.print("$ ");
             String input = scanner.nextLine();
 
-            if (input.equals("exit")) {
+            if (input.trim().equals("exit")) {
                 break;
             } else if (input.startsWith("echo ")) {
                 System.out.println(input.substring(5));
             } else if (input.startsWith("type ")) {
+
                 String command = input.substring(5).trim();
-                if (command.equals("echo") || command.equals("exit") || command.equals("type")) {
-                    System.out.println(command + " is a shell builtin");
-                } else {
-                    String path = System.getenv("PATH");
-                    if(path == null){
-                        System.out.println(command + ": not found");
-                        return;
-                    }
-                    String[] directories = path.split(File.pathSeparator);
-                    boolean found = false;
-                    for (String dir : directories) {
-                        File file = new File(dir, command);
-                        if (file.exists() && file.canExecute()) {
-                            System.out.println(command +" is "+file.getAbsolutePath());
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                        System.out.println(command + ": not found");
-                }
+                System.out.println(command + Main.type(command));
+
             } else {
-                System.out.println(input + ": command not found");
+                String[] parts = input.split(" ");
+                String executable = getPath(parts[0]);
+                if (executable != null) {
+                    ArrayList<String> command = new ArrayList<>();
+                    command.add(executable);
+                    for (int i = 1; i < parts.length; i++) {
+                        command.add(parts[i]);
+                    }
+                    Process process = new ProcessBuilder(command)
+                            .inheritIO()
+                            .start();
+                    process.waitFor();
+                } else {
+                    System.out.println(input + ": command not found");
+                }
             }
         }
+    }
+
+    private static String type(String command) {
+
+        if (command.equals("echo") || command.equals("exit") || command.equals("type")) {
+            return " is a shell builtin";
+        } else {
+            String filePath = getPath(command);
+            return (filePath != null ? " is " + filePath : ": not found");
+        }
+    }
+
+    public static String getPath(String command) {
+
+        String[] directories = path.split(File.pathSeparator);
+        for (String dir : directories) {
+            File file = new File(dir, command);
+            if (file.isFile() && file.canExecute()) {
+                return file.getAbsolutePath();
+            }
+        }
+        return null;
     }
 }
