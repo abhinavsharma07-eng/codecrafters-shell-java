@@ -18,7 +18,7 @@ public class Main {
             System.out.print("$ ");
             String input = scanner.nextLine();
 
-            if (input.startsWith("exit ")) {
+            if (input.equals("exit")) {
                 break;
 
             } else if (input.startsWith("echo ")) {
