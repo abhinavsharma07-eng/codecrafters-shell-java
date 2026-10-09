@@ -1,24 +1,41 @@
-
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 public class Main {
 
     static String path = System.getenv("PATH");
     static File currentDirectory = new File(System.getProperty("user.dir"));
-    static final Set<String> BUILTINS = Set.of(
-            "echo",
-            "exit",
-            "type",
-            "pwd",
-            "cd"
-    );
+    static final Set<String> BUILTINS = Set.of("echo", "exit", "type", "pwd", "cd");
+
+    public static List<String> parseArgs(String argument) {
+        List<String> arguments = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+
+        boolean isSingleQuote = false;
+        boolean tokenStarted = false;
+
+        for (int i = 0; i < argument.length(); i++) {
+            char c = argument.charAt(i);
+            if (c == '\'') {
+                isSingleQuote = !isSingleQuote;
+                tokenStarted = true;
+            } else if (Character.isWhitespace(c) && !isSingleQuote) {
+                if (tokenStarted) {
+                    arguments.add(current.toString());
+                    current.setLength(0);
+                    tokenStarted = false;
+                }
+            } else {
+                current.append(c);
+                tokenStarted = true;
+            }
+        }
+        if (tokenStarted) {
+            arguments.add(current.toString());
+        }
+        return arguments;
+    }
 
     public static void main(String[] args) throws Exception {
 
@@ -28,38 +45,39 @@ public class Main {
 
             System.out.print("$ ");
             String input = scanner.nextLine();
-            String command = input.split(" ")[0];
+            List<String> parts = parseArgs(input);
+            if (parts.isEmpty()) {
+                continue;
+            }
+            String command = parts.getFirst();
 
             if (command.equals("exit")) {
                 break;
 
             } else if (command.equals("echo")) {
-                System.out.println(input.substring(5));
+                System.out.println(String.join(" ", parts.subList(1, parts.size())));
 
             } else if (command.equals("type")) {
 
-                String argument = input.substring(5).trim();
-                System.out.println(argument + Main.type(argument));
-
-            } else if(command.equals("pwd")) {
+                if (parts.size() > 1) {
+                    String argument = parts.get(1);
+                    System.out.println(Main.type(argument));
+                }
+            } else if (command.equals("pwd")) {
                 File currentPath = new File(".");
                 System.out.println(currentDirectory.getCanonicalPath());
 
-            } else if(command.equals("cd")) {
-                String argument = Main.cd(input.substring(2).trim());
-                if(argument != null){
-                    System.out.println(command + argument);
+            } else if (command.equals("cd")) {
+                String argument = parts.size() > 1 ? parts.get(1) : "";
+                String result = Main.cd(argument);
+                if (result != null) {
+                    System.out.println(command + result);
                 }
             } else {
-                String[] parts = input.split(" ");
-                String executable = getPath(parts[0]);
+
+                String executable = getPath(command);
                 if (executable != null) {
-                    ArrayList<String> argument = new ArrayList<>();
-                    argument.add(parts[0]);
-                    for (int i = 1; i < parts.length; i++) {
-                        argument.add(parts[i]);
-                    }
-                    ProcessBuilder pb = new ProcessBuilder(argument);
+                    ProcessBuilder pb = new ProcessBuilder(parts);
                     pb.directory(currentDirectory);
                     pb.inheritIO();
 
@@ -74,32 +92,31 @@ public class Main {
 
     public static String type(String argument) {
 
-        if (BUILTINS.contains(argument)){
-            return " is a shell builtin";
+        if (BUILTINS.contains(argument)) {
+            return argument + " is a shell builtin";
         } else {
             String filePath = getPath(argument);
-            return (filePath != null ? " is " + filePath : ": not found");
+            return (filePath != null ? argument + " is " + filePath : argument + ": not found");
         }
     }
 
     public static String cd(String argument) throws IOException {
-        if(argument.equals("~")||argument.isEmpty()) {
-            currentDirectory =  new File(System.getenv("HOME")).getCanonicalFile();
+
+        if (argument.equals("~") || argument.isEmpty()) {
+            currentDirectory = new File(System.getenv("HOME")).getCanonicalFile();
             return null;
         }
         File newDirectory;
-        if(new File(argument).isAbsolute()){
+        if (new File(argument).isAbsolute()) {
             newDirectory = new File(argument);
-        }
-        else{
+        } else {
             newDirectory = new File(currentDirectory, argument);
         }
         if (newDirectory.isDirectory()) {
             currentDirectory = newDirectory.getCanonicalFile();
-                return null;
-        }
-        else{
-           return ": "+argument+": No such file or directory";
+            return null;
+        } else {
+            return ": " + argument + ": No such file or directory";
         }
     }
 
