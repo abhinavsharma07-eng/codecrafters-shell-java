@@ -13,20 +13,32 @@ public class Main {
         StringBuilder current = new StringBuilder();
 
         boolean isSingleQuote = false;
+        boolean isDoubleQuote = false;
         boolean tokenStarted = false;
+
 
         for (int i = 0; i < argument.length(); i++) {
             char c = argument.charAt(i);
-            if (c == '\'') {
+            if(c == '"' && !isSingleQuote){
+                isDoubleQuote = !isDoubleQuote;
+                tokenStarted = true;
+            } else if (c == '\'' && !isDoubleQuote) {
                 isSingleQuote = !isSingleQuote;
                 tokenStarted = true;
-            } else if (Character.isWhitespace(c) && !isSingleQuote) {
+            } else if (Character.isWhitespace(c) && !isDoubleQuote) {
                 if (tokenStarted) {
                     arguments.add(current.toString());
                     current.setLength(0);
                     tokenStarted = false;
                 }
-            } else {
+            }
+            else if (Character.isWhitespace(c) && !isDoubleQuote) {
+                if (tokenStarted) {
+                    arguments.add(current.toString());
+                    current.setLength(0);
+                    tokenStarted = false;
+                }
+                }else {
                 current.append(c);
                 tokenStarted = true;
             }
