@@ -19,26 +19,19 @@ public class Main {
 
         for (int i = 0; i < argument.length(); i++) {
             char c = argument.charAt(i);
-            if(c == '"' && !isSingleQuote){
+            if (c == '"' && !isSingleQuote) {
                 isDoubleQuote = !isDoubleQuote;
                 tokenStarted = true;
             } else if (c == '\'' && !isDoubleQuote) {
                 isSingleQuote = !isSingleQuote;
                 tokenStarted = true;
-            } else if (Character.isWhitespace(c) && !isDoubleQuote) {
+            } else if (Character.isWhitespace(c) && !isDoubleQuote && !isSingleQuote) {
                 if (tokenStarted) {
                     arguments.add(current.toString());
                     current.setLength(0);
                     tokenStarted = false;
                 }
-            }
-            else if (Character.isWhitespace(c) && !isDoubleQuote) {
-                if (tokenStarted) {
-                    arguments.add(current.toString());
-                    current.setLength(0);
-                    tokenStarted = false;
-                }
-                }else {
+            } else {
                 current.append(c);
                 tokenStarted = true;
             }
