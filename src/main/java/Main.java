@@ -19,7 +19,24 @@ public class Main {
 
         for (int i = 0; i < argument.length(); i++) {
             char c = argument.charAt(i);
-            if (c == '"' && !isSingleQuote) {
+            if (c == '\\' && !isSingleQuote && !isDoubleQuote) {
+                if (i + 1 < argument.length()) {
+                    current.append(argument.charAt(++i));
+                }
+                tokenStarted = true;
+            } else if (c == '\\' && isDoubleQuote) {
+                if (i + 1 < argument.length()) {
+                    char next = argument.charAt(i + 1);
+                    if (next == '\\' || next == '"' || next == '$' || next == '`') {
+                        current.append(next);
+                        i++;
+                    } else {
+                        current.append('\\');
+                    }
+                } else {
+                    current.append('\\');
+                }
+            } else if (c == '"' && !isSingleQuote) {
                 isDoubleQuote = !isDoubleQuote;
                 tokenStarted = true;
             } else if (c == '\'' && !isDoubleQuote) {
